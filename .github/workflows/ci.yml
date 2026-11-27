@@ -1,0 +1,52 @@
+name: CI y publicación
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    env:
+      # Clave PUBLICABLE de Supabase (pública por diseño, la misma que ya va en la web).
+      # La tabla contact_submissions solo permite INSERT anónimo con RLS; nadie puede leer.
+      VITE_SUPABASE_URL: https://c--74262347-e915-4726-8c21-80af7c67d583-prod.lovable.cloud
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uTcScqsxNWZH90E3AX0twQ_p2YpyoIE
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Lint
+        run: bun run lint
+      - name: Tipos
+        run: bunx tsc --noEmit
+      - name: Tests
+        run: bun run test
+      - name: Build para GitHub Pages
+        run: bun run build
+        env:
+          GITHUB_PAGES: "1"
+          PAGES_REPO: ${{ github.event.repository.name }}
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: dist/client
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
