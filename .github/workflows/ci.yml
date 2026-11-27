@@ -32,9 +32,10 @@ jobs:
         env:
           GITHUB_PAGES: "1"
           PAGES_REPO: ${{ github.event.repository.name }}
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: github.ref == 'refs/heads/main'
         with:
+          name: web
           path: dist/client
 
   deploy:
@@ -42,11 +43,17 @@ jobs:
     needs: checks
     runs-on: ubuntu-latest
     permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      contents: write
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: web
+          path: web
+      - name: Publica en la rama gh-pages (GitHub Pages)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: web
+          publish_branch: gh-pages
+          force_orphan: true
+          enable_jekyll: false

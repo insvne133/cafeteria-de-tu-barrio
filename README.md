@@ -24,7 +24,7 @@ Comprobaciones: `bun run lint`, `bunx tsc --noEmit`, `bun run test`, `bun run bu
 - `src/styles.css`: colores y tipografías (Fraunces + Inter).
 - `src/integrations/supabase/`: cliente de Supabase (generado por Lovable, no se edita a mano).
 - `drizzle/migrations/`: tabla `contact_submissions` y su política RLS.
-- `.github/workflows/ci.yml`: lint, tipos, tests y build en cada cambio; publica en GitHub Pages desde `main`.
+- `.github/workflows/ci.yml`: lint, tipos, tests y build en cada cambio; desde `main` publica la web en la rama `gh-pages` (GitHub Pages).
 
 ## Qué hace y qué no
 
